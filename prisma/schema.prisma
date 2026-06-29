@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  crearedAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  email    String @unique
+  password String
+
+  name       String @unique
+  avatarPath String @default("") @map("uploads/default-avatar.png")
+  phone      String @default("")
+
+  @@map("users")
+}
