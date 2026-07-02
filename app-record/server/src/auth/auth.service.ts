@@ -5,9 +5,15 @@ import { faker } from '@faker-js/faker/locale/en_US'
 import { hash, verify } from 'argon2'
 import { JwtService } from '@nestjs/jwt'
 import { User } from '../../generated/prisma/client'
+
 type JwtPayload = {
   id: string
 }
+type AuthTokens = {
+  accessToken: string
+  refreshToken: string
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -38,12 +44,9 @@ export class AuthService {
       throw new UnauthorizedException('User not found')
     }
 
-    const token = await this.issueToken(user.id)
+    const tokens = await this.issueToken(user.id)
 
-    return {
-      user: this.returnUserField(user),
-      ...token
-    }
+    return this.buildAuthResponse(user, tokens)
   }
   async register(dto: AuthDto) {
     const oldUser = await this.prisma.user.findUnique({
@@ -64,10 +67,7 @@ export class AuthService {
       }
     })
     const tokens = await this.issueToken(user.id)
-    return {
-      user: this.returnUserField(user),
-      ...tokens
-    }
+    return this.buildAuthResponse(user, tokens)
   }
 
   private async issueToken(userId: string) {
@@ -80,6 +80,7 @@ export class AuthService {
     })
     return { accessToken, refreshToken }
   }
+
   private returnUserField(user: User) {
     return {
       id: user.id,
@@ -98,5 +99,12 @@ export class AuthService {
     const isValid = await verify(user.password, dto.password)
     if (!isValid) throw new UnauthorizedException('Invalid password')
     return user
+  }
+
+  private buildAuthResponse(user: User, tokens: AuthTokens) {
+    return {
+      user: this.returnUserField(user),
+      ...tokens
+    }
   }
 }
