@@ -1,0 +1,45 @@
+ПЕРЕИСПОЛЬЗОВАНИЕ СЕРВЕРА В НОВОМ ПРОЕКТЕ
+==========================================
+
+1. СКОПИРОВАТЬ ПАПКИ
+   Из app-record/server/src/ взять:
+   - prisma/
+   - auth/
+   - config/
+   - main.ts
+   - app.module.ts
+
+2. СОЗДАТЬ БАЗУ ДАННЫХ
+   CREATE DATABASE new_project;
+
+3. НАСТРОИТЬ .env (app-record/server/.env)
+   DATABASE_URL=postgresql://user:password@localhost:5432/new_project
+   JWT_SECRET=новый_секрет
+
+4. ПЕРЕПИСАТЬ СХЕМУ PRISMA (app-record/server/prisma/schema.prisma)
+   - Модель User скорее всего останется, при необходимости изменить поля
+   - Добавить новые модели под предметную область
+
+5. ПРИМЕНИТЬ МИГРАЦИИ (из app-record/server/)
+   npx prisma migrate dev
+   npx prisma generate
+
+6. ИСПРАВИТЬ ПЕРЕД ПРОДОМ
+   a) jwt.strategy.ts — убрать ignoreExpiration: true
+   b) auth.module.ts — хранить refresh-токены в БД (таблица refresh_tokens
+      или хэш в модели User), чтобы можно было инвалидировать при logout
+   c) auth.service.ts — убрать faker из register(), принимать реальные поля
+   d) main.ts — ограничить CORS:
+      app.enableCors({ origin: 'https://yourdomain.com' })
+   e) main.ts — сделать ValidationPipe глобальным вместо @UsePipes на контроллерах:
+      app.useGlobalPipes(new ValidationPipe())
+
+7. ДОБАВИТЬ НОВЫЕ МОДУЛИ
+   Создавать рядом с auth/ и user/ по той же структуре:
+   src/
+   ├── prisma/      (не трогать)
+   ├── auth/        (не трогать)
+   ├── config/      (не трогать)
+   ├── user/        (не трогать или расширить)
+   ├── новый-модуль/
+   └── app.module.ts (добавить НовыйМодуль в imports)
