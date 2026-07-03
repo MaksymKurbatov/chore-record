@@ -1,5 +1,5 @@
 import { Body, Injectable, UnauthorizedException } from '@nestjs/common'
-import { PrismaService } from '../prisma.service'
+import { PrismaService } from '../prisma/prisma.service'
 import { AuthDto } from './dto/auth.dto'
 import { faker } from '@faker-js/faker/locale/en_US'
 import { hash, verify } from 'argon2'
