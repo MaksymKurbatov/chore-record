@@ -1,0 +1,55 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpException,
+  Param,
+  Post,
+  Put,
+  UsePipes,
+  ValidationPipe
+} from '@nestjs/common'
+import { CategoryService } from './category.service'
+import { Category } from '../../generated/prisma/client'
+import { CategoryDto } from './dto/category.dto'
+
+@Controller('categories')
+export class CategoryController {
+  constructor(private readonly categoryService: CategoryService) {}
+
+  @Get()
+  async getAll() {
+    return await this.categoryService.getAll()
+  }
+
+  @Get('by-id/:id')
+  async getById(@Param('id') id: string) {
+    return await this.categoryService.getById(id)
+  }
+
+  @Get('by-slug/:slug')
+  async getBySlug(@Param('slug') slug: string) {
+    return this.categoryService.getBySlug(slug)
+  }
+
+  @HttpCode(200)
+  @Post()
+  async create() {
+    return await this.categoryService.create()
+  }
+
+  @HttpCode(200)
+  @UsePipes(new ValidationPipe())
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() dto: CategoryDto) {
+    return await this.categoryService.update(id, dto)
+  }
+
+  @HttpCode(200)
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.categoryService.delete(id)
+  }
+}
