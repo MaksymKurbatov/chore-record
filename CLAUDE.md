@@ -37,7 +37,24 @@ JWT_SECRET=your_secret_here
 
 **NestJS 11** backend. All routes served under `/api`. Swagger UI at `/docs`.
 
-**Database**: PostgreSQL via **Prisma 6**. Schema at `app-record/server/prisma/schema.prisma`. Generated client outputs to `app-record/server/generated/prisma/` — always run `npx prisma generate` after schema changes before working in the server.
+**Database**: PostgreSQL via **Prisma 6**. Schema at `app-record/server/prisma/schema.prisma`. Generated client outputs to `app-record/server/generated/prisma/` — always import from there, never from `@prisma/client`. Always run `npx prisma generate` after schema changes.
+
+### Module structure
+
+```
+src/
+├── prisma/          # @Global() PrismaModule — never add PrismaService to other modules' providers
+├── auth/            # JWT auth (register / login / token rotation)
+├── config/          # jwt.config.ts — JwtModule factory
+├── user/            # user profile + favorites
+├── product/         # product CRUD + search + category filter
+├── category/        # category CRUD; exported so ProductModule can inject CategoryService
+└── utils/           # generateSlug()
+```
+
+### PrismaModule
+
+Marked `@Global()` — `PrismaService` is available in every module without being listed in their `providers`. New modules only need to inject it in the constructor.
 
 ### Auth module (`src/auth/`)
 
@@ -53,6 +70,23 @@ Token lifetimes: access = 1 day, refresh = 7 days. Passwords hashed with **argon
 
 **Decorators** (`src/auth/decorators/`):
 - `@Auth()` — applies `AuthGuard('jwt')` to a route
-- `@CurrentUser(field?)` — extracts the full `User` object or a specific field from the request
+- `@CurrentUser(field?)` — extracts the full `User` object or a specific field from `req.user`
 
-**`PrismaService`** is a thin `PrismaClient` wrapper provided in both `AppModule` and `AuthModule`.
+### Select objects pattern
+
+Each domain module has a `return-*.ts` file that defines a `Prisma.*Select` constant (e.g. `returnProductObject`, `returnUserObject`). These are passed to `select:` in Prisma queries to keep response shapes consistent. Always import from the correct module — spreading `returnProductObject` into a `UserSelect` will cause a runtime validation error.
+
+### Slug generation
+
+`src/utils/generate-slug.ts` — `generateSlug(text)` lowercases, strips non-alphanumeric characters, and replaces spaces with `-`. Called in `category.service.ts` and `product.service.ts` on create/update.
+
+### Category ↔ Product dependency
+
+`ProductModule` imports `CategoryModule` (which exports `CategoryService`) so that `ProductService` can validate `categoryId` via `CategoryService.getById()` before connecting a product to a category.
+
+### Adding a new module
+
+1. Create `src/<name>/<name>.module.ts` with only own providers — no `PrismaService`
+2. Register it in `AppModule.imports`
+3. Inject `PrismaService` directly in the service constructor
+4. Add a `return-<name>-object.ts` with a `Prisma.<Name>Select` constant for consistent response shapes
