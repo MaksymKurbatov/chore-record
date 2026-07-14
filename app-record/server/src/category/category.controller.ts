@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  HttpException,
   Param,
   Post,
   Put,
@@ -12,7 +11,6 @@ import {
   ValidationPipe
 } from '@nestjs/common'
 import { CategoryService } from './category.service'
-import { Category } from '../../generated/prisma/client'
 import { CategoryDto } from './dto/category.dto'
 
 @Controller('categories')

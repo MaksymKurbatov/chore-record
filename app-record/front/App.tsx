@@ -1,12 +1,12 @@
-import { Text } from 'react-native'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import Navigation from '@/navigation/Navigation'
 
 export default function App() {
 	return (
 		<>
 			<SafeAreaProvider>
-				<Text>Homeoooooooo</Text>
+				<Navigation />
 			</SafeAreaProvider>
 			<StatusBar style='auto' />
 		</>
