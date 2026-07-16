@@ -4,7 +4,7 @@ import React from 'react'
 const Home: React.FC = () => {
 	return (
 		<View>
-			<Text>Home</Text>
+			<Text>Hddome</Text>
 		</View>
 	)
 }
