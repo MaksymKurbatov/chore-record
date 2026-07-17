@@ -10,6 +10,7 @@
     "expo-status-bar": "~57.0.0",
     "prettier": "^3.9.5",
     "react": "19.2.3",
+    "react-hook-form": "^7.81.0",
     "react-native": "0.86.0",
     "react-native-paper": "^5.15.3",
     "react-native-safe-area-context": "~5.7.0",
