@@ -1,7 +1,8 @@
 import { StatusBar } from 'expo-status-bar'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { PaperProvider } from 'react-native-paper'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Navigation from '@/navigation/Navigation'
+import AuthProvider from '@/providers/auth/AuthProvider'
 import { ThemeProvider, useAppTheme } from '@/theme/ThemeContext'
 
 function AppContent() {
@@ -9,10 +10,12 @@ function AppContent() {
 
 	return (
 		<PaperProvider theme={theme}>
-			<SafeAreaProvider>
-				<Navigation />
-				<StatusBar style={isDark ? 'light' : 'dark'} />
-			</SafeAreaProvider>
+			<AuthProvider>
+				<SafeAreaProvider>
+					<Navigation />
+					<StatusBar style={isDark ? 'light' : 'dark'} />
+				</SafeAreaProvider>
+			</AuthProvider>
 		</PaperProvider>
 	)
 }
