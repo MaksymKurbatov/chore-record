@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react'
 import { darkTheme } from './darkTheme'
 import { lightTheme } from './lightTheme'
-import { BASE_THEME, AppTheme } from './theme'
+import { AppTheme, BASE_THEME } from './theme'
 
 type ThemeContextType = {
 	theme: AppTheme
@@ -15,7 +15,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 	children
 }) => {
 	const [isDark, setIsDark] = useState(BASE_THEME === 'dark')
-	debugger
+	//TODO: refactor logic for changing theme
 
 	const toggleTheme = () => setIsDark(prev => !prev)
 

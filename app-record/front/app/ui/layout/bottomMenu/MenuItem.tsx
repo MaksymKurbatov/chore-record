@@ -1,6 +1,8 @@
 import React from 'react'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { Feather } from '@expo/vector-icons'
+import { IconButton, useTheme } from 'react-native-paper'
+import { AppTheme } from '@/theme/theme'
 import { IMenuItem, TypeNavigate } from '@/ui/layout/bottomMenu/menu.interface'
 
 interface IMenuItemProps {
@@ -8,19 +10,21 @@ interface IMenuItemProps {
 	nav: TypeNavigate
 	currentRoute?: string
 }
-
 const MenuItem: React.FC<IMenuItemProps> = ({ item, nav, currentRoute }) => {
+	//const { customColors } = useTheme<AppTheme>()
+	const { colors } = useTheme<AppTheme>()
+
 	const isActive = currentRoute === item.path
 
 	return (
 		<View style={styles.container}>
-			<Pressable onPress={() => nav(item.path)} style={styles.menuItem}>
-				<Feather
-					name={item.icon}
-					size={26}
-					color={isActive ? '#47AA52' : '#374151'}
-				/>
-			</Pressable>
+			<IconButton
+				onPress={() => nav(item.path)}
+				icon={({ size, color }) => (
+					<Feather name={item.icon} size={size} color={color} />
+				)}
+				iconColor={isActive ? colors.primary : colors.onSurface}
+			/>
 		</View>
 	)
 }
