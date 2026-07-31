@@ -6,7 +6,8 @@ import {
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { useAuth } from '@/hooks/useAuth'
 import { TypeRootStackParamsList } from '@/navigation/navigation.type'
-import { routes } from '@/navigation/routes'
+import { authRoutes, privateRoutes } from '@/navigation/routes'
+import { useCheckAuth } from '@/providers/auth/useCheckAuth'
 import BottomMenu from '@/ui/layout/bottomMenu/bottomMenu'
 import { TypeNavigate } from '@/ui/layout/bottomMenu/menu.interface'
 
@@ -34,6 +35,13 @@ const Navigation: React.FC = () => {
 		[]
 	)
 
+	useCheckAuth(currentRoute)
+
+	// Переход после логина не делается вручную: меняется сам набор экранов, и
+	// навигатор встаёт на первый экран новой ветки (Auth -> Home). Экрана Auth
+	// в приватной ветке нет, поэтому вернуться на него кнопкой «назад» нельзя.
+	const routes = user ? privateRoutes : authRoutes
+
 	return (
 		<>
 			<NavigationContainer ref={navRef}>
@@ -43,11 +51,9 @@ const Navigation: React.FC = () => {
 					))}
 				</Stack.Navigator>
 			</NavigationContainer>
-			{
-				/*user && */ currentRoute && (
-					<BottomMenu nav={handleNavigate} currentRoute={currentRoute} />
-				)
-			}
+			{user && currentRoute && (
+				<BottomMenu nav={handleNavigate} currentRoute={currentRoute} />
+			)}
 		</>
 	)
 }
