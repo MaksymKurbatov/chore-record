@@ -3,6 +3,6 @@ export interface IUser {
 	email: string
 	password: string
 	name: string
-	avatar: string
+	avatarPath: string
 	favorite: any
 }

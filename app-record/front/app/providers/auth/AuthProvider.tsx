@@ -4,28 +4,44 @@ import {
 	IContext,
 	TypeUserState
 } from '@/providers/auth/auth-provider.interface'
+import { getAccessToken, getUserFromStorage } from '@/services/auth/auth.helper'
+import { onLogout } from '@/services/auth/auth.logout'
 
 export const AuthContext = React.createContext({} as IContext)
-let ignore = SplashScreen.preventAutoHideAsync()
+void SplashScreen.preventAutoHideAsync()
 
 const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
 	const [user, setUser] = useState<TypeUserState>(null)
 
 	useEffect(() => {
-		let mounted = true
-		const checkAccesToken = async () => {
+		let isMounted = true
+		const checkAccessToken = async () => {
 			try {
-			} catch {
+				const accessToken = await getAccessToken()
+				if (accessToken) {
+					const user = await getUserFromStorage()
+					if (isMounted) setUser(user)
+				}
+			} catch (error) {
+				console.warn('Не удалось восстановить сессию:', error)
 			} finally {
 				await SplashScreen.hideAsync()
 			}
 		}
-		let ignore = checkAccesToken()
+		void checkAccessToken()
 		return () => {
-			mounted = false
+			isMounted = false
 		}
 	}, [])
-	return <AuthContext.Provider value={{ user, setUser }}>{children}</AuthContext.Provider>
+
+	// Разлогин может прийти из сервисного слоя (интерцептор, useCheckAuth) —
+	// это единственное место, где он превращается в сброс React-стейта.
+	useEffect(() => onLogout(() => setUser(null)), [])
+	return (
+		<AuthContext.Provider value={{ user, setUser }}>
+			{children}
+		</AuthContext.Provider>
+	)
 }
 
 export default AuthProvider

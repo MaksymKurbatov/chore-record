@@ -31,8 +31,14 @@ export class AuthService {
     }
   }
   async getNewToken(refreshToken: string) {
-    const result = await this.jwt.verifyAsync<JwtPayload>(refreshToken)
-    if (!result) throw new UnauthorizedException('Invalid refresh token')
+    let result: JwtPayload
+    try {
+      // verifyAsync бросает TokenExpiredError/JsonWebTokenError, а не HttpException:
+      // без обёртки клиент получал бы 500 вместо 401 и не понимал, что сессия мертва.
+      result = await this.jwt.verifyAsync<JwtPayload>(refreshToken)
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token')
+    }
 
     const user = await this.prisma.user.findUnique({
       where: {

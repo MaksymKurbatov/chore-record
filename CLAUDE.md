@@ -137,15 +137,15 @@ app/
 
 ### Navigation (`app/navigation/`)
 
-- `routes.ts` — the flat list of `{ name, component }` entries (`IRoute[]`), driven by `TypeRootStackParamsList` in `navigation.type.ts`. Add a new screen by adding both a key to `TypeRootStackParamsList` and an entry to `routes`.
+- `routes.ts` — two lists of `{ name, component }` entries (`IRoute[]`), driven by `TypeRootStackParamsList` in `navigation.type.ts`: `authRoutes` (logged-out branch, currently just `Auth`) and `privateRoutes` (everything behind the login). Add a new screen by adding both a key to `TypeRootStackParamsList` and an entry to the right list. The first entry of each list is that branch's initial screen.
 - `Navigation.tsx` — the root component, rendered directly from `App.tsx`. It owns a `useNavigationContainerRef<TypeRootStackParamsList>()` — **always pass the `TypeRootStackParamsList` generic explicitly**; leaving it off makes `getCurrentRoute()` resolve to `never` and breaks call sites like `.name`. The ref must also be passed to `<NavigationContainer ref={navRef}>` or navigation methods won't be attached.
 - Tracks the active route name via `navRef.addListener('state', ...)` into local state, which feeds the bottom tab bar (`ui/layout/bottomMenu`).
-- `PrivateNavigation.tsx` exists as an auth-gated variant of the stack (renders `Auth` screen when `user` is falsy, the full `routes` list otherwise) but is **not currently used** by `App.tsx` — `App.tsx` renders `Navigation` directly.
+- The stack is auth-gated inside `Navigation.tsx`: it renders `user ? privateRoutes : authRoutes`. **There is no manual `navigate()` after login/logout** — swapping the screen list is what moves the app between `Auth` and `Home`, and it also keeps `Auth` out of the history once logged in. Never re-add `Auth` to `privateRoutes`. The bottom tab bar is rendered only when `user` is set.
 - `useTypedNavigation()` (`app/hooks/`) wraps `useNavigation()` with the `TypeRootStackParamsList` generic — prefer it over the untyped hook inside screens.
 
 ### Auth state (`app/providers/auth/`)
 
-`AuthProvider` holds `user` in React state (`AuthContext`), consumed via the `useAuth()` hook. There is currently no token/session restoration logic — `user` starts `null` and nothing sets it — so anything gated on `user` (e.g. `PrivateNavigation`) stays on the logged-out branch until that's implemented.
+`AuthProvider` holds `user` in React state (`AuthContext`), consumed via the `useAuth()` hook. On mount it restores the session from storage (access token in `expo-secure-store`, profile in `AsyncStorage`) and hides the splash screen. `setUser` is called from `useAuthMutations` on successful login/register; the reset to `null` goes through `logout()` (`services/auth/auth.logout.ts`), which notifies `AuthProvider` via the `onLogout` listener — that's the only place service-layer code touches React state.
 
 ### Refs during render (ESLint `react-hooks/refs`)
 

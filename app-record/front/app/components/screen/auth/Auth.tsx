@@ -10,6 +10,7 @@ import {
 import { type SubmitHandler, useForm } from 'react-hook-form'
 import AuthFields from '@/components/screen/auth/authField/AuthFields'
 import AuthSwitcher from '@/components/screen/auth/authSwitcher/AuthSwitcher'
+import { useAuthMutations } from '@/components/screen/auth/useAuthMutation'
 import type { IAuthFormData } from '@/types/auth.interface'
 import Loader from '@/ui/loader/Loader'
 import StyledButton from '@/ui/styledButton/styledButton'
@@ -17,14 +18,14 @@ import StyledButton from '@/ui/styledButton/styledButton'
 const Auth: React.FC = () => {
 	const [isReg, setIsReg] = React.useState(false)
 
-	const { handleSubmit, control } = useForm<IAuthFormData>({
+	const { handleSubmit, reset, control } = useForm<IAuthFormData>({
 		mode: 'onChange'
 	})
-
-	const isLoading = false
+	const { isLoading, loginSync, registerSync } = useAuthMutations(reset)
 
 	const onSubmit: SubmitHandler<IAuthFormData> = data => {
-		console.log('onSubmit', data)
+		if (isReg) registerSync(data)
+		else loginSync(data)
 	}
 
 	return (
