@@ -1,12 +1,19 @@
 import axios, { InternalAxiosRequestConfig } from 'axios'
-import { API_URL } from '@/config/api.config'
+import { API_URL, REQUEST_TIMEOUT } from '@/config/api.config'
 import { errorCatch } from '@/services/api/error.api'
 import { getNewToken } from '@/services/api/helper.auth'
 import { getAccessToken } from '@/services/auth/auth.helper'
 import { logout } from '@/services/auth/auth.logout'
 
+declare module 'axios' {
+	interface InternalAxiosRequestConfig {
+		_isRetry?: boolean
+	}
+}
+
 const instance = axios.create({
 	baseURL: API_URL,
+	timeout: REQUEST_TIMEOUT,
 	headers: {
 		'Content-Type': 'application/json'
 	}
@@ -25,7 +32,7 @@ instance.interceptors.request.use(
 )
 
 instance.interceptors.response.use(
-	config => config,
+	response => response,
 	async error => {
 		const originalRequest = error.config
 		// error.response нет при сетевой ошибке/таймауте — без ?. обработчик
