@@ -1,6 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { deleteTokenStorage } from '@/services/auth/auth.helper'
-import { EnumAsyncStorage } from '@/types/auth.interface'
+import { deleteUserFromStorage } from '@/services/auth/auth.user-storage'
 
 type TypeLogoutListener = () => void
 
@@ -25,6 +24,6 @@ export const onLogout = (listener: TypeLogoutListener) => {
  */
 export const logout = async () => {
 	await deleteTokenStorage()
-	await AsyncStorage.removeItem(EnumAsyncStorage.USER)
+	await deleteUserFromStorage()
 	listeners.forEach(listener => listener())
 }

@@ -9,6 +9,8 @@ if (!SERVER_URL) {
 
 export const API_URL = `${SERVER_URL}/api`
 
+export const REQUEST_TIMEOUT = 15_000
+
 // Во все get*Url путь передаётся без ведущего слэша: getAuthUrl('login').
 // Префиксы должны совпадать с @Controller() на сервере — они в единственном
 // числе везде, кроме categories.

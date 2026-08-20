@@ -1,5 +1,5 @@
 import axios, { isAxiosError } from 'axios'
-import { API_URL, getAuthUrl } from '@/config/api.config'
+import { API_URL, REQUEST_TIMEOUT, getAuthUrl } from '@/config/api.config'
 import { getRefreshToken, saveToStorage } from '@/services/auth/auth.helper'
 import { IAuthResponse, TypeRefreshResult } from '@/types/auth.interface'
 
@@ -17,6 +17,10 @@ const requestNewToken = async (): Promise<TypeRefreshResult> => {
 			`${API_URL}${getAuthUrl('login/access-token')}`,
 			{ refreshToken },
 			{
+				// Этот запрос идёт мимо instance, значит и его таймаут не
+				// наследует — без него зависший refresh задержал бы и старт
+				// приложения, и все ретраи по 401.
+				timeout: REQUEST_TIMEOUT,
 				headers: {
 					'Content-Type': 'application/json'
 				}
